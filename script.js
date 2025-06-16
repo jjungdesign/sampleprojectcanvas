@@ -1517,7 +1517,6 @@ function showTourTooltip() {
             <h3 class="tour-tooltip-title">Step 1: Setup project settings</h3>
             <p class="tour-tooltip-body">By setting a name and a goal, you provide context for the tasks you're working on. This ensures all the content and suggestions are relevant to your project.</p>
             <div class="tour-tooltip-actions">
-                <span style="font-size: 12px; font-weight: 300; color: #9CA3AF; align-self: center;">1/5 Steps</span>
                 <button class="tour-next-btn" onclick="closeTourTooltip()">Next</button>
             </div>
         </div>
@@ -1602,7 +1601,7 @@ function showTourTooltipStep2(targetElement) {
             <p class="tour-tooltip-body">Open a Jasper App and fill in the key details about your campaign. It lays a strong foundation for your marketing campaign.</p>
             <div class="tour-tooltip-actions">
                 <button class="tour-back-btn" onclick="goBackToTourStep1()">Back</button>
-                <button class="tour-next-btn" onclick="goToTourStep3()">Next</button>
+                <button class="tour-next-btn" onclick="restartModalAnimation()">Show me how</button>
             </div>
         </div>
         <div class="tour-tooltip-arrow"></div>
@@ -1762,11 +1761,11 @@ function showBlogPostTooltip(targetElement) {
     tooltip.innerHTML = `
         <div class="tour-tooltip-content">
             <button class="tour-tooltip-close" onclick="closeTour()">&times;</button>
-            <h3 class="tour-tooltip-title">Step 3: Use App to create asset</h3>
-            <p class="tour-tooltip-body">Use assets as context to create the next asset</p>
+            <h3 class="tour-tooltip-title">Step 3: Use existing assets as context to create the next one</h3>
+            <p class="tour-tooltip-body">Select the Campaign Brief document and either open a chat or use another App to create a context-aware blog post.</p>
             <div class="tour-tooltip-actions">
                 <button class="tour-back-btn" onclick="goBackToTourStep2()">Back</button>
-                <button class="tour-next-btn" onclick="restartModalAnimation()">Show me how</button>
+                <button class="tour-next-btn" onclick="showCampaignBriefChatDemo()">Show me how</button>
             </div>
         </div>
         <div class="tour-tooltip-arrow"></div>
@@ -1776,6 +1775,403 @@ function showBlogPostTooltip(targetElement) {
     tooltip.targetElement = targetElement;
     positionTourTooltipStep2(tooltip, targetElement); // Re-use existing positioning logic
     setupTooltipTracking(tooltip, targetElement); // Re-use existing tracking logic
+}
+
+function showCampaignBriefChatDemo() {
+    console.log('=== showCampaignBriefChatDemo started ===');
+    
+    // 1. Remove the tooltip
+    const tooltip = document.querySelector('.tour-tooltip');
+    if (tooltip) tooltip.remove();
+
+    // 2. Remove highlight from ALL possible blog post selectors
+    console.log('Looking for blog post cards to remove highlights...');
+    
+    // Try multiple selectors for blog post
+    const blogPostSelectors = ['.blog-post', '.asset-card.blog-post', '[class*="blog"]', '.website-blog .asset-card'];
+    let blogPostFound = false;
+    
+    blogPostSelectors.forEach(selector => {
+        const elements = document.querySelectorAll(selector);
+        console.log(`Selector "${selector}" found ${elements.length} elements:`, elements);
+        elements.forEach((element, index) => {
+            console.log(`  Element ${index} classes before:`, element.className);
+            element.classList.remove('tour-highlight', 'highlight', 'highlighted');
+            console.log(`  Element ${index} classes after:`, element.className);
+            blogPostFound = true;
+        });
+    });
+    
+    // Also remove highlights from ALL cards as a fallback
+    const allHighlightedCards = document.querySelectorAll('.tour-highlight, .highlight');
+    console.log('All currently highlighted cards:', allHighlightedCards);
+    allHighlightedCards.forEach((card, index) => {
+        console.log(`Removing highlight from card ${index}:`, card.className);
+        card.classList.remove('tour-highlight', 'highlight', 'highlighted');
+        console.log(`Card ${index} after removal:`, card.className);
+    });
+    
+    if (!blogPostFound) {
+        console.log('No blog post cards found with any selector - listing all cards:');
+        const allCards = document.querySelectorAll('.asset-card, .card, [class*="card"]');
+        allCards.forEach((card, index) => {
+            console.log(`Card ${index}:`, card.className, card);
+        });
+    }
+    
+    // 3. Highlight Campaign Brief
+    const campaignBriefCard = document.querySelector('.campaign-brief');
+    console.log('Campaign brief card found:', campaignBriefCard);
+    if (campaignBriefCard) {
+        campaignBriefCard.classList.add('tour-highlight');
+        console.log('Added highlight to campaign brief');
+        
+        // Pan canvas to better show the campaign brief document
+        panToCampaignBrief(campaignBriefCard);
+        
+        // Add the campaign brief pill to the chat immediately
+        addCampaignBriefPillToChat();
+    } else {
+        console.log('Campaign brief card not found - checking all cards');
+        const allCards = document.querySelectorAll('.card');
+        console.log('All cards found:', allCards);
+        allCards.forEach((card, index) => {
+            console.log(`Card ${index}:`, card.className, card);
+        });
+    }
+
+    // 3. After a delay, change the "Ask jasper anything" text and show Voilà tooltip
+    setTimeout(() => {
+        updateChatInputText();
+    }, 800);
+}
+
+function panToCampaignBrief(campaignBriefCard) {
+    console.log('panToCampaignBrief called with:', campaignBriefCard);
+    
+    // Get current canvas position
+    const canvas = document.querySelector('.canvas');
+    const canvasViewport = document.getElementById('canvasViewport');
+    
+    if (!canvas || !canvasViewport) {
+        console.log('Canvas or viewport not found');
+        return;
+    }
+    
+    console.log('Canvas and viewport found');
+    
+    // Get the campaign brief card position relative to the viewport
+    const cardRect = campaignBriefCard.getBoundingClientRect();
+    const viewportRect = canvasViewport.getBoundingClientRect();
+    
+    console.log('Card rect:', cardRect);
+    console.log('Viewport rect:', viewportRect);
+    
+    // Get current transform values
+    const currentTransform = canvasViewport.style.transform || 'translate(0px, 0px) scale(1)';
+    console.log('Current transform:', currentTransform);
+    
+    const transformMatch = currentTransform.match(/translate\(([^,]+),\s*([^)]+)\)/);
+    const scaleMatch = currentTransform.match(/scale\(([^)]+)\)/);
+    
+    let currentX = transformMatch ? parseFloat(transformMatch[1]) || 0 : 0;
+    let currentY = transformMatch ? parseFloat(transformMatch[2]) || 0 : 0;
+    let currentScale = scaleMatch ? parseFloat(scaleMatch[1]) || 1 : 1;
+    
+    console.log('Current position:', currentX, currentY, 'Scale:', currentScale);
+    
+    // Calculate the center of the viewport
+    const viewportCenterX = viewportRect.width / 2;
+    const viewportCenterY = viewportRect.height / 2;
+    
+    // Calculate the center of the card relative to the viewport
+    const cardCenterX = cardRect.left - viewportRect.left + (cardRect.width / 2);
+    const cardCenterY = cardRect.top - viewportRect.top + (cardRect.height / 2);
+    
+    // Calculate how much to move to center the card
+    const deltaX = viewportCenterX - cardCenterX;
+    const deltaY = viewportCenterY - cardCenterY;
+    
+    // Apply the delta to current position
+    const newX = currentX + deltaX;
+    const newY = currentY + deltaY;
+    
+    console.log('Centering calculation:');
+    console.log('  Viewport center:', viewportCenterX, viewportCenterY);
+    console.log('  Card center:', cardCenterX, cardCenterY);
+    console.log('  Delta:', deltaX, deltaY);
+    console.log('  New position:', newX, newY);
+    
+    // Animate the canvas pan to center the campaign brief
+    animateCanvasTo(newX, newY, 600);
+}
+
+function addCampaignBriefPillToChat() {
+    // Find the chat input area
+    const chatInput = document.querySelector('.chat-input');
+    if (!chatInput) return;
+
+    // Create the campaign brief pill
+    const pill = document.createElement('div');
+    pill.className = 'context-pill-demo';
+    pill.style.cssText = `
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        background: #3B82F6;
+        color: white;
+        border-radius: 8px;
+        padding: 2px 6px;
+        font-size: 10px;
+        font-weight: 500;
+        margin: 2px 4px 2px 2px;
+        opacity: 0;
+        transform: translateY(5px);
+        transition: all 0.3s ease;
+        position: absolute;
+        left: 6px;
+        top: 6px;
+        z-index: 10;
+    `;
+    pill.innerHTML = `
+        <svg width="8" height="8" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="2" width="12" height="12" rx="2"/>
+        </svg>
+        <span>Campaign Brief</span>
+        <span style="margin-left: 2px; cursor: pointer; opacity: 0.8; font-size: 8px;">×</span>
+    `;
+
+    // Insert the pill inside the chat input
+    chatInput.style.position = 'relative';
+    chatInput.appendChild(pill);
+
+    // Adjust the textarea to make room for the pill and increase height
+    const inputField = chatInput.querySelector('.input-field'); // This is the textarea
+    const textareaElement = chatInput.querySelector('textarea');
+    const chatSidebar = document.querySelector('.chat-sidebar');
+    
+    // Keep the input at normal flow but adjust content to prevent overflow
+    chatInput.style.minHeight = '48px';
+    chatInput.style.height = '48px';
+    
+    // Adjust only the chat content area to accommodate the taller input
+    if (chatSidebar) {
+        const chatContent = chatSidebar.querySelector('.chat-content');
+        if (chatContent) {
+            // Reduce content area slightly to make room for taller input
+            chatContent.style.maxHeight = 'calc(100vh - 200px)'; // Ensure it fits in viewport
+            chatContent.style.overflowY = 'auto';
+            chatContent.style.paddingBottom = '8px';
+        }
+    }
+    
+    if (inputField) {
+        inputField.style.paddingLeft = '100px';
+        inputField.style.height = '48px';
+        inputField.style.lineHeight = '48px';
+        inputField.style.boxSizing = 'border-box';
+        inputField.style.resize = 'none'; // Prevent textarea resize
+    }
+    if (textareaElement) {
+        textareaElement.style.paddingLeft = '100px';
+        textareaElement.style.height = '48px';
+        textareaElement.style.lineHeight = '48px';
+        textareaElement.style.boxSizing = 'border-box';
+        textareaElement.style.resize = 'none'; // Prevent textarea resize
+    }
+
+    // Animate it in
+    setTimeout(() => {
+        pill.style.opacity = '1';
+        pill.style.transform = 'translateY(0)';
+    }, 50);
+}
+
+function updateChatInputText() {
+    console.log('updateChatInputText called');
+    
+    // Find the chat input textarea (it's actually a textarea, not input)
+    const chatInputField = document.querySelector('.chat-input .input-field');
+    const chatInputTextarea = document.querySelector('.chat-input textarea');
+    
+    console.log('Found textarea field:', chatInputField);
+    console.log('Found textarea element:', chatInputTextarea);
+    
+    if (chatInputField) {
+        console.log('Updating textarea placeholder');
+        chatInputField.placeholder = 'Create a blog post using this Campaign Brief as context.';
+    }
+    
+    if (chatInputTextarea) {
+        console.log('Updating textarea placeholder (backup)');
+        chatInputTextarea.placeholder = 'Create a blog post using this Campaign Brief as context.';
+    }
+    
+    // Show the "Voilà!" tooltip pointing at the chat sidebar at the same time as text change
+    showVoilaTooltip();
+}
+
+function showVoilaTooltip() {
+    // Remove any existing tooltips first
+    const existingTooltip = document.querySelector('.tour-tooltip');
+    if (existingTooltip) existingTooltip.remove();
+    
+    // Find the chat sidebar to point at
+    const chatSidebar = document.querySelector('.chat-sidebar');
+    if (!chatSidebar) return;
+    
+    // Create the tooltip
+    const tooltip = document.createElement('div');
+    tooltip.className = 'tour-tooltip';
+    tooltip.innerHTML = `
+        <div class="tour-tooltip-content">
+            <button class="tour-tooltip-close" onclick="closeVoilaTooltip()">&times;</button>
+            <h3 class="tour-tooltip-title">Voilà!</h3>
+            <p class="tour-tooltip-body">Recap: The Campaign Brief was selected in Canvas and used as context in chat to create a blog post.</p>
+            <div class="tour-tooltip-actions">
+                <button class="tour-next-btn" onclick="goToStep4FromVoila()">Next</button>
+            </div>
+        </div>
+        <div class="tour-tooltip-arrow"></div>
+    `;
+    
+    document.body.appendChild(tooltip);
+    
+    // Position the tooltip to the right of the chat sidebar
+    positionVoilaTooltip(tooltip, chatSidebar);
+    
+    // Set up tracking for responsive positioning
+    setupVoilaTooltipTracking(tooltip, chatSidebar);
+}
+
+function positionVoilaTooltip(tooltip, chatSidebar) {
+    const sidebarRect = chatSidebar.getBoundingClientRect();
+    const tooltipRect = tooltip.getBoundingClientRect();
+    
+    // Position to the right of the chat sidebar, vertically centered
+    const left = sidebarRect.right + 20; // 20px gap from sidebar
+    const top = sidebarRect.top + (sidebarRect.height / 2) - (tooltipRect.height / 2);
+    
+    tooltip.style.left = left + 'px';
+    tooltip.style.top = Math.max(20, top) + 'px'; // Ensure it doesn't go above viewport
+    
+    // Position the arrow to point left (towards the sidebar)
+    const arrow = tooltip.querySelector('.tour-tooltip-arrow');
+    if (arrow) {
+        arrow.style.left = '-8px';
+        arrow.style.top = '50%';
+        arrow.style.transform = 'translateY(-50%) rotate(45deg)';
+        arrow.style.border = 'none';
+        arrow.style.backgroundColor = '#FFFFFF';
+    }
+}
+
+function setupVoilaTooltipTracking(tooltip, chatSidebar) {
+    const updatePosition = () => positionVoilaTooltip(tooltip, chatSidebar);
+    
+    window.addEventListener('resize', updatePosition);
+    window.addEventListener('scroll', updatePosition);
+    
+    // Store cleanup function
+    tooltip._cleanup = () => {
+        window.removeEventListener('resize', updatePosition);
+        window.removeEventListener('scroll', updatePosition);
+    };
+}
+
+function closeVoilaTooltip() {
+    const tooltip = document.querySelector('.tour-tooltip');
+    if (tooltip) {
+        if (tooltip._cleanup) tooltip._cleanup();
+        tooltip.remove();
+    }
+}
+
+function goToStep4FromVoila() {
+    // Close the current Voilà tooltip
+    closeVoilaTooltip();
+    
+    // Remove campaign brief pill and reset chat input to default state
+    resetChatInputToDefault();
+    
+    // Start Step 4 of the tour
+    startTourStep4();
+}
+
+function resetChatInputToDefault() {
+    // Remove highlights from all cards - try multiple selectors and classes
+    const allCards = document.querySelectorAll('.card, .blog-post, .campaign-brief, .asset-card, .app-card');
+    allCards.forEach((card, index) => {
+        console.log(`Card ${index} classes before:`, card.className);
+        card.classList.remove('tour-highlight', 'highlight', 'highlighted', 'selected');
+        console.log(`Card ${index} classes after:`, card.className);
+    });
+    
+    // Also try specific selectors with more thorough class removal
+    const blogPostCard = document.querySelector('.blog-post');
+    if (blogPostCard) {
+        console.log('Blog post card classes before:', blogPostCard.className);
+        // Remove all possible highlight classes
+        blogPostCard.classList.remove('tour-highlight', 'highlight', 'highlighted', 'selected');
+        // Force remove any remaining highlight-related classes
+        blogPostCard.className = blogPostCard.className.replace(/\b(tour-)?highlight(ed)?\b/g, '').trim();
+        console.log('Blog post card classes after:', blogPostCard.className);
+    }
+    
+    const campaignBriefCard = document.querySelector('.campaign-brief');
+    if (campaignBriefCard) {
+        console.log('Campaign brief card classes before:', campaignBriefCard.className);
+        campaignBriefCard.classList.remove('tour-highlight', 'highlight', 'highlighted', 'selected');
+        // Force remove any remaining highlight-related classes
+        campaignBriefCard.className = campaignBriefCard.className.replace(/\b(tour-)?highlight(ed)?\b/g, '').trim();
+        console.log('Campaign brief card classes after:', campaignBriefCard.className);
+    }
+    
+    // Remove the campaign brief pill
+    const pill = document.querySelector('.context-pill-demo');
+    if (pill) {
+        pill.remove();
+    }
+    
+    // Reset chat input styling to default
+    const chatInput = document.querySelector('.chat-input');
+    if (chatInput) {
+        chatInput.style.minHeight = '';
+        chatInput.style.height = '';
+    }
+    
+    // Reset textarea styling to default
+    const inputField = chatInput?.querySelector('.input-field');
+    const textareaElement = chatInput?.querySelector('textarea');
+    
+    if (inputField) {
+        inputField.style.paddingLeft = '';
+        inputField.style.height = '';
+        inputField.style.lineHeight = '';
+        inputField.style.boxSizing = '';
+        inputField.style.resize = '';
+        inputField.placeholder = 'Ask Jasper anything...'; // Reset to default placeholder
+    }
+    
+    if (textareaElement) {
+        textareaElement.style.paddingLeft = '';
+        textareaElement.style.height = '';
+        textareaElement.style.lineHeight = '';
+        textareaElement.style.boxSizing = '';
+        textareaElement.style.resize = '';
+        textareaElement.placeholder = 'Ask Jasper anything...'; // Reset to default placeholder
+    }
+    
+    // Reset chat content area styling
+    const chatSidebar = document.querySelector('.chat-sidebar');
+    if (chatSidebar) {
+        const chatContent = chatSidebar.querySelector('.chat-content');
+        if (chatContent) {
+            chatContent.style.maxHeight = '';
+            chatContent.style.overflowY = '';
+            chatContent.style.paddingBottom = '';
+        }
+    }
 }
 
 function restartModalAnimation() {
@@ -1855,8 +2251,8 @@ function showAppModalAnimation() {
                 <div class="app-card-tag">Popular</div>
             </div>
             <div class="app-card-body">
-                <h3 class="app-card-title">Blog Post</h3>
-                <p class="app-card-description">Write long-form content that provides value, drives traffic, and enhances SEO</p>
+                <h3 class="app-card-title">Campaign Brief</h3>
+                <p class="app-card-description">Create comprehensive campaign briefs that outline strategy, messaging, and key deliverables</p>
             </div>
         </div>
     `;
@@ -1918,7 +2314,7 @@ function showCampaignBriefModal() {
                 <div class="app-modal-icon">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
                 </div>
-                <span class="app-modal-title">Blog Post</span>
+                <span class="app-modal-title">Campaign Brief</span>
             </div>
             <div class="app-modal-actions">
                  <button class="app-modal-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg></button>
@@ -1927,7 +2323,7 @@ function showCampaignBriefModal() {
             </div>
         </div>
         <div class="app-modal-body">
-            <p class="app-modal-description">Write long-form content that provides value, drives traffic, and enhances SEO</p>
+            <p class="app-modal-description">Create comprehensive campaign briefs that outline strategy, messaging, and key deliverables</p>
             <div class="form-section">
                  <div class="dropdown-field">
                     <span class="form-section-value">Whisker Voice • Pet parents • English... • 1...</span>
@@ -1936,11 +2332,6 @@ function showCampaignBriefModal() {
             </div>
             <div class="form-section">
                 <div class="form-section-header">Add project assets for context</div>
-                <div class="context-chip">
-                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="2"/></svg>
-                    <span>Summer of Sniffs Campaign Brief</span>
-                    <span class="chip-close">×</span>
-                </div>
             </div>
             <div class="dropdown-field">
                 <span class="form-section-title">Topic</span>
@@ -1988,8 +2379,8 @@ function showThirdTourTooltip(modal) {
     tooltip.className = 'tour-tooltip tour-tooltip-attached';
     tooltip.innerHTML = `
         <div class="tour-tooltip-content">
-            <h3 class="tour-tooltip-title">Here's a Blog Post App</h3>
-            <p class="tour-tooltip-body">With an App, you can turn your ideas into SEO-ready blogs in minutes.</p>
+            <h3 class="tour-tooltip-title">Here's a Campaign Brief App</h3>
+            <p class="tour-tooltip-body">With an App, you can turn your ideas into comprehensive campaign briefs in minutes.</p>
             <div class="tour-tooltip-actions">
                 <button class="tour-next-btn" onclick="closeThirdTourTooltip()">Next</button>
             </div>
@@ -2031,8 +2422,8 @@ function closeThirdTourTooltip() {
         setTimeout(() => appModal.remove(), 200); // Match CSS transition
     }
 
-    // Start the 4th tour step
-    startTourStep4();
+    // Go to tour step 3
+    goToTourStep3();
 }
 
 function startTourStep4() {
@@ -2066,8 +2457,8 @@ function showTourTooltipStep4(targetElement) {
     tooltip.innerHTML = `
         <div class="tour-tooltip-content">
             <button class="tour-tooltip-close" onclick="closeTour()">&times;</button>
-            <h3 class="tour-tooltip-title">Step 4: Use chat to create more assets</h3>
-            <p class="tour-tooltip-body">Here are your grouped social media assets. Each card represents a post or script for a different channel. You can edit, duplicate, or add new assets as needed.</p>
+            <h3 class="tour-tooltip-title">Step 4: Create multiple assets at once</h3>
+            <p class="tour-tooltip-body">Generate multiple Instagram posts at once with targeted messaging that aligns with your campaign strategy and brand voice.</p>
             <div class="tour-tooltip-actions">
                 <button class="tour-back-btn" onclick="goBackToTourStep3()">Back</button>
                 <button class="tour-next-btn" onclick="closeTourStep4()">Next</button>
@@ -2228,19 +2619,9 @@ function closeTourStep5() {
     }
     removeTooltipTracking();
 
-    // With a short delay, add a final message from Jasper that mimics the greeting style
+    // Add more delay before the final Jasper message appears
     setTimeout(() => {
-        const chatContent = document.querySelector('.chat-content');
-        const finalMessageContainer = document.createElement('div');
-        finalMessageContainer.className = 'jasper-message-container';
-
-        finalMessageContainer.innerHTML = `
-            <div class="jasper-header">
-                <div class="jasper-avatar"></div>
-                <span class="jasper-name">Jasper</span>
-            </div>
-                         <div class="jasper-message" style="border: none;">
-                 When you're ready, start your own project in a fresh Canvas.
+        const finalMessage = `When you're ready, start your own project in a fresh Canvas.
                 <button 
                     onclick="createNewProject()" 
                     style="
@@ -2261,13 +2642,11 @@ function closeTourStep5() {
                     onmouseout="this.style.background='#F3F4F6'"
                 >
                     Create project
-                </button>
-            </div>
-        `;
+                </button>`;
         
-        chatContent.appendChild(finalMessageContainer);
-        chatContent.scrollTop = chatContent.scrollHeight;
-    }, 500);
+        // Use the same animation as other Jasper messages
+        addMessageToChat('Jasper', finalMessage, true);
+    }, 1200); // Increased delay from 500ms to 1200ms
 }
 
 function createNewProject() {
