@@ -1722,19 +1722,20 @@ function removeTooltipTracking() {
 }
 
 function goToTourStep3() {
+    console.log('🐛 DEBUG: goToTourStep3 updated function called - Blog Post reset');
     // Remove existing tooltip
     const tooltip = document.querySelector('.tour-tooltip');
     if (tooltip) {
         tooltip.remove();
     }
     
-    // Remove highlight from Campaign Brief card
-    const campaignBriefCard = document.querySelector('.campaign-brief');
-    if (campaignBriefCard) {
-        campaignBriefCard.classList.remove('tour-highlight');
-    }
+    // Remove highlight from all previously highlighted elements
+    const allHighlightedElements = document.querySelectorAll('.tour-highlight');
+    allHighlightedElements.forEach(element => {
+        element.classList.remove('tour-highlight');
+    });
 
-    // Find and highlight the Blog Post card
+    // Find and highlight the Blog Post card (reset to beginning)
     const blogPostCard = document.querySelector('#tour-blog-post-card');
     if (!blogPostCard) {
         console.error('Blog post card not found for tour!');
@@ -1907,9 +1908,9 @@ function panToCampaignBrief(campaignBriefCard) {
 }
 
 function addCampaignBriefPillToChat() {
-    // Find the chat input area
-    const chatInput = document.querySelector('.chat-input');
-    if (!chatInput) return;
+    // Find the input container (inside the chat input)
+    const inputContainer = document.querySelector('.chat-input .input-container');
+    if (!inputContainer) return;
 
     // Create the campaign brief pill
     const pill = document.createElement('div');
@@ -1917,74 +1918,88 @@ function addCampaignBriefPillToChat() {
     pill.style.cssText = `
         display: inline-flex;
         align-items: center;
-        gap: 3px;
+        gap: 4px;
         background: #3B82F6;
         color: white;
-        border-radius: 8px;
-        padding: 2px 6px;
-        font-size: 10px;
+        border-radius: 6px;
+        padding: 4px 8px;
+        font-size: 11px;
         font-weight: 500;
-        margin: 2px 4px 2px 2px;
         opacity: 0;
         transform: translateY(5px);
         transition: all 0.3s ease;
         position: absolute;
-        left: 6px;
-        top: 6px;
-        z-index: 10;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%) translateY(5px);
+        z-index: 20;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        cursor: default;
     `;
     pill.innerHTML = `
-        <svg width="8" height="8" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+        <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
             <rect x="2" y="2" width="12" height="12" rx="2"/>
         </svg>
         <span>Campaign Brief</span>
-        <span style="margin-left: 2px; cursor: pointer; opacity: 0.8; font-size: 8px;">×</span>
+        <span style="margin-left: 4px; cursor: pointer; opacity: 0.8; font-size: 10px; padding: 0 2px;">×</span>
     `;
 
-    // Insert the pill inside the chat input
-    chatInput.style.position = 'relative';
-    chatInput.appendChild(pill);
+    // Make the input container relative for positioning
+    inputContainer.style.position = 'relative';
+    inputContainer.appendChild(pill);
 
-    // Adjust the textarea to make room for the pill and increase height
-    const inputField = chatInput.querySelector('.input-field'); // This is the textarea
-    const textareaElement = chatInput.querySelector('textarea');
-    const chatSidebar = document.querySelector('.chat-sidebar');
+    // Adjust the textarea to make room for the pill
+    const inputField = inputContainer.querySelector('.input-field');
     
-    // Keep the input at normal flow but adjust content to prevent overflow
-    chatInput.style.minHeight = '48px';
-    chatInput.style.height = '48px';
+    if (inputField) {
+        // Calculate pill width to determine left padding
+        const pillWidth = 110; // Approximate width of the pill + padding
+        
+        inputField.style.paddingLeft = `${pillWidth}px`;
+        inputField.style.paddingTop = '16px';
+        inputField.style.paddingBottom = '16px';
+        inputField.style.paddingRight = '16px';
+        inputField.style.minHeight = '80px';
+        inputField.style.boxSizing = 'border-box';
+        inputField.style.resize = 'none';
+        inputField.style.lineHeight = '1.4';
+    }
+
+    // Animate the pill in
+    setTimeout(() => {
+        pill.style.opacity = '1';
+        pill.style.transform = 'translateY(-50%) translateY(0)';
+    }, 50);
+
+    // Add click handler for the close button
+    const closeBtn = pill.querySelector('span:last-child');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            removeCampaignBriefPill();
+        });
+    }
+}
+
+function removeCampaignBriefPill() {
+    const pill = document.querySelector('.context-pill-demo');
+    const inputField = document.querySelector('.chat-input .input-field');
     
-    // Adjust only the chat content area to accommodate the taller input
-    if (chatSidebar) {
-        const chatContent = chatSidebar.querySelector('.chat-content');
-        if (chatContent) {
-            // Reduce content area slightly to make room for taller input
-            chatContent.style.maxHeight = 'calc(100vh - 200px)'; // Ensure it fits in viewport
-            chatContent.style.overflowY = 'auto';
-            chatContent.style.paddingBottom = '8px';
-        }
+    if (pill) {
+        // Animate out
+        pill.style.opacity = '0';
+        pill.style.transform = 'translateY(-50%) translateY(-5px)';
+        setTimeout(() => pill.remove(), 300);
     }
     
     if (inputField) {
-        inputField.style.paddingLeft = '100px';
-        inputField.style.height = '48px';
-        inputField.style.lineHeight = '48px';
-        inputField.style.boxSizing = 'border-box';
-        inputField.style.resize = 'none'; // Prevent textarea resize
+        // Reset input field styling to new larger defaults
+        inputField.style.paddingLeft = '16px';
+        inputField.style.paddingTop = '16px';
+        inputField.style.paddingBottom = '16px';
+        inputField.style.paddingRight = '16px';
+        inputField.style.minHeight = '80px';
     }
-    if (textareaElement) {
-        textareaElement.style.paddingLeft = '100px';
-        textareaElement.style.height = '48px';
-        textareaElement.style.lineHeight = '48px';
-        textareaElement.style.boxSizing = 'border-box';
-        textareaElement.style.resize = 'none'; // Prevent textarea resize
-    }
-
-    // Animate it in
-    setTimeout(() => {
-        pill.style.opacity = '1';
-        pill.style.transform = 'translateY(0)';
-    }, 50);
 }
 
 function updateChatInputText() {
@@ -2127,50 +2142,13 @@ function resetChatInputToDefault() {
         console.log('Campaign brief card classes after:', campaignBriefCard.className);
     }
     
-    // Remove the campaign brief pill
-    const pill = document.querySelector('.context-pill-demo');
-    if (pill) {
-        pill.remove();
-    }
+    // Remove the campaign brief pill using the new function
+    removeCampaignBriefPill();
     
-    // Reset chat input styling to default
-    const chatInput = document.querySelector('.chat-input');
-    if (chatInput) {
-        chatInput.style.minHeight = '';
-        chatInput.style.height = '';
-    }
-    
-    // Reset textarea styling to default
-    const inputField = chatInput?.querySelector('.input-field');
-    const textareaElement = chatInput?.querySelector('textarea');
-    
+    // Reset input field placeholder
+    const inputField = document.querySelector('.chat-input .input-field');
     if (inputField) {
-        inputField.style.paddingLeft = '';
-        inputField.style.height = '';
-        inputField.style.lineHeight = '';
-        inputField.style.boxSizing = '';
-        inputField.style.resize = '';
         inputField.placeholder = 'Ask Jasper anything...'; // Reset to default placeholder
-    }
-    
-    if (textareaElement) {
-        textareaElement.style.paddingLeft = '';
-        textareaElement.style.height = '';
-        textareaElement.style.lineHeight = '';
-        textareaElement.style.boxSizing = '';
-        textareaElement.style.resize = '';
-        textareaElement.placeholder = 'Ask Jasper anything...'; // Reset to default placeholder
-    }
-    
-    // Reset chat content area styling
-    const chatSidebar = document.querySelector('.chat-sidebar');
-    if (chatSidebar) {
-        const chatContent = chatSidebar.querySelector('.chat-content');
-        if (chatContent) {
-            chatContent.style.maxHeight = '';
-            chatContent.style.overflowY = '';
-            chatContent.style.paddingBottom = '';
-        }
     }
 }
 
@@ -2691,24 +2669,29 @@ function goBackToTourStep2() {
 }
 
 function goBackToTourStep3() {
+    console.log('🐛 DEBUG: goBackToTourStep3 updated function called - Blog Post reset');
     // Remove current tooltip
     const tooltip = document.querySelector('.tour-tooltip');
     if (tooltip) tooltip.remove();
     
-    // Remove highlight from social media group
-    const socialMediaGroup = document.querySelector('.social-media .asset-cards-row');
-    if (socialMediaGroup) socialMediaGroup.classList.remove('tour-highlight');
+    // Remove highlight from all previously highlighted elements
+    const allHighlightedElements = document.querySelectorAll('.tour-highlight');
+    allHighlightedElements.forEach(element => {
+        element.classList.remove('tour-highlight');
+    });
     
-    // Find and highlight the Campaign Brief card again
-    const campaignBriefCard = document.querySelector('.campaign-brief');
-    if (campaignBriefCard) {
-        campaignBriefCard.classList.add('tour-highlight');
-        
-        // Pan to the element and show step 3 tooltip
-        panToElement(campaignBriefCard, () => {
-            showBlogPostTooltip(campaignBriefCard);
-        }, true);
+    // Find and highlight the Blog Post card (reset to beginning)
+    const blogPostCard = document.querySelector('#tour-blog-post-card');
+    if (!blogPostCard) {
+        console.error('Blog post card not found for tour!');
+        return;
     }
+    blogPostCard.classList.add('tour-highlight');
+    
+    // Pan to the element and show step 3 tooltip
+    panToElement(blogPostCard, () => {
+        showBlogPostTooltip(blogPostCard);
+    }, true);
 }
 
 function goBackToTourStep4() {
