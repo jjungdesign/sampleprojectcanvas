@@ -1781,11 +1781,21 @@ function showBlogPostTooltip(targetElement) {
 function showCampaignBriefChatDemo() {
     console.log('=== showCampaignBriefChatDemo started ===');
     
-    // 1. Remove the tooltip
+    // 1. Remove the tooltip first
     const tooltip = document.querySelector('.tour-tooltip');
     if (tooltip) tooltip.remove();
-
-    // 2. Remove highlight from ALL possible blog post selectors
+    
+    // Pan canvas to the left by 500px first
+    const canvasViewport = document.getElementById('canvasViewport');
+    if (canvasViewport) {
+        // Pan 300px to the left from current position
+        const newX = currentX + 300;
+        animateCanvasTo(newX, currentY, 600);
+    }
+    
+    // Add delay before highlighting campaign brief
+    setTimeout(() => {
+        // 2. Remove highlight from ALL possible blog post selectors
     console.log('Looking for blog post cards to remove highlights...');
     
     // Try multiple selectors for blog post
@@ -1841,10 +1851,11 @@ function showCampaignBriefChatDemo() {
         });
     }
 
-    // 3. After a delay, change the "Ask jasper anything" text and show Voilà tooltip
-    setTimeout(() => {
-        updateChatInputText();
-    }, 800);
+        // 3. After a delay, change the "Ask jasper anything" text and show Voilà tooltip
+        setTimeout(() => {
+            updateChatInputText();
+        }, 800);
+    }, 700); // Wait 700ms after canvas pan (which takes 600ms) before highlighting
 }
 
 function panToCampaignBrief(campaignBriefCard) {
@@ -1926,12 +1937,11 @@ function addCampaignBriefPillToChat() {
         font-size: 11px;
         font-weight: 500;
         opacity: 0;
-        transform: translateY(5px);
+        transform: translateY(-5px);
         transition: all 0.3s ease;
         position: absolute;
         left: 12px;
-        top: 50%;
-        transform: translateY(-50%) translateY(5px);
+        top: 12px;
         z-index: 20;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         cursor: default;
@@ -1948,27 +1958,26 @@ function addCampaignBriefPillToChat() {
     inputContainer.style.position = 'relative';
     inputContainer.appendChild(pill);
 
-    // Adjust the textarea to make room for the pill
+    // Adjust the textarea to make room for the pill at the top
     const inputField = inputContainer.querySelector('.input-field');
     
     if (inputField) {
-        // Calculate pill width to determine left padding
-        const pillWidth = 110; // Approximate width of the pill + padding
-        
-        inputField.style.paddingLeft = `${pillWidth}px`;
-        inputField.style.paddingTop = '16px';
+        // Adjust padding to make room for pill at top and move text below
+        inputField.style.paddingLeft = '16px';
+        inputField.style.paddingTop = '44px'; // Space for pill + gap
         inputField.style.paddingBottom = '16px';
         inputField.style.paddingRight = '16px';
         inputField.style.minHeight = '80px';
         inputField.style.boxSizing = 'border-box';
         inputField.style.resize = 'none';
-        inputField.style.lineHeight = '1.4';
+        inputField.style.lineHeight = '1.5';
+        inputField.style.fontSize = '14px'; // Match Jasper message font size
     }
 
     // Animate the pill in
     setTimeout(() => {
         pill.style.opacity = '1';
-        pill.style.transform = 'translateY(-50%) translateY(0)';
+        pill.style.transform = 'translateY(0)';
     }, 50);
 
     // Add click handler for the close button
@@ -1988,7 +1997,7 @@ function removeCampaignBriefPill() {
     if (pill) {
         // Animate out
         pill.style.opacity = '0';
-        pill.style.transform = 'translateY(-50%) translateY(-5px)';
+        pill.style.transform = 'translateY(-5px)';
         setTimeout(() => pill.remove(), 300);
     }
     
@@ -1999,6 +2008,8 @@ function removeCampaignBriefPill() {
         inputField.style.paddingBottom = '16px';
         inputField.style.paddingRight = '16px';
         inputField.style.minHeight = '80px';
+        inputField.style.fontSize = '14px'; // Keep consistent font size
+        inputField.style.lineHeight = '1.5';
     }
 }
 
