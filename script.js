@@ -1515,7 +1515,7 @@ function showTourTooltip() {
         <div class="tour-tooltip-content">
             <button class="tour-tooltip-close" onclick="closeTour()">&times;</button>
             <h3 class="tour-tooltip-title">Step 1: Setup project settings</h3>
-            <p class="tour-tooltip-body">By setting a name and a goal, you provide context for the tasks you're working on. This ensures all the content and suggestions are relevant to your project.</p>
+            <p class="tour-tooltip-body">Define your project's foundation here - brand voice, audience, goals, and all reference materials will automatically apply to all content created in this project.</p>
             <div class="tour-tooltip-actions">
                 <button class="tour-next-btn" onclick="closeTourTooltip()">Next</button>
             </div>
@@ -1597,8 +1597,8 @@ function showTourTooltipStep2(targetElement) {
     tooltip.innerHTML = `
         <div class="tour-tooltip-content">
             <button class="tour-tooltip-close" onclick="closeTour()">&times;</button>
-            <h3 class="tour-tooltip-title">Step 2: Start with campaign brief</h3>
-            <p class="tour-tooltip-body">Open a Jasper App and fill in the key details about your campaign. It lays a strong foundation for your marketing campaign.</p>
+            <h3 class="tour-tooltip-title">Step 2: Start with an App</h3>
+            <p class="tour-tooltip-body">Open a Jasper App, like Campaign Brief, and fill in all input fields. This will build your first asset inside your project and kickstart your campaign.</p>
             <div class="tour-tooltip-actions">
                 <button class="tour-back-btn" onclick="goBackToTourStep1()">Back</button>
                 <button class="tour-next-btn" onclick="restartModalAnimation()">Show me how</button>
@@ -1763,7 +1763,7 @@ function showBlogPostTooltip(targetElement) {
         <div class="tour-tooltip-content">
             <button class="tour-tooltip-close" onclick="closeTour()">&times;</button>
             <h3 class="tour-tooltip-title">Step 3: Use existing assets as context to create the next one</h3>
-            <p class="tour-tooltip-body">Select the Campaign Brief document and either open a chat or use another App to create a context-aware blog post.</p>
+            <p class="tour-tooltip-body">Select the Campaign Brief document and either open another App or use our Chat to create a context-aware blog post.</p>
             <div class="tour-tooltip-actions">
                 <button class="tour-back-btn" onclick="goBackToTourStep2()">Back</button>
                 <button class="tour-next-btn" onclick="showCampaignBriefChatDemo()">Show me how</button>
@@ -1785,11 +1785,11 @@ function showCampaignBriefChatDemo() {
     const tooltip = document.querySelector('.tour-tooltip');
     if (tooltip) tooltip.remove();
     
-    // Pan canvas to the left by 500px first
+    // Gentle canvas adjustment to better showcase the demo
     const canvasViewport = document.getElementById('canvasViewport');
     if (canvasViewport) {
-        // Pan 300px to the left from current position
-        const newX = currentX + 300;
+        // Pan 150px to the left from current position (reduced from 300px)
+        const newX = currentX + 150;
         animateCanvasTo(newX, currentY, 600);
     }
     
@@ -2023,18 +2023,63 @@ function updateChatInputText() {
     console.log('Found textarea field:', chatInputField);
     console.log('Found textarea element:', chatInputTextarea);
     
-    if (chatInputField) {
-        console.log('Updating textarea placeholder');
-        chatInputField.placeholder = 'Create a blog post using this Campaign Brief as context.';
+    const targetText = 'Create a blog post using this Campaign Brief as context.';
+    
+    // Function to simulate typing animation
+    function typeText(element, text, speed = 30) {
+        if (!element) return Promise.resolve();
+        
+        element.placeholder = ''; // Clear current placeholder
+        
+        // Make placeholder text black during typing
+        const originalColor = element.style.color;
+        element.style.setProperty('color', '#000000', 'important');
+        
+        // Add CSS to make placeholder black
+        const style = document.createElement('style');
+        style.textContent = `
+            .input-field::placeholder {
+                color: #000000 !important;
+                opacity: 1 !important;
+            }
+        `;
+        document.head.appendChild(style);
+        
+        let i = 0;
+        
+        return new Promise((resolve) => {
+            function type() {
+                if (i < text.length) {
+                    element.placeholder += text.charAt(i);
+                    i++;
+                    setTimeout(type, speed);
+                } else {
+                    resolve();
+                }
+            }
+            type();
+        });
     }
     
-    if (chatInputTextarea) {
-        console.log('Updating textarea placeholder (backup)');
-        chatInputTextarea.placeholder = 'Create a blog post using this Campaign Brief as context.';
-    }
+    // Apply typing animation to both elements (whichever exists)
+    const elementToAnimate = chatInputField || chatInputTextarea;
     
-    // Show the "Voilà!" tooltip pointing at the chat sidebar at the same time as text change
-    showVoilaTooltip();
+    if (elementToAnimate) {
+        console.log('Starting typing animation');
+        typeText(elementToAnimate, targetText, 25).then(() => {
+            console.log('Typing animation complete');
+            
+            // Show the "Voilà!" tooltip pointing at the chat sidebar after a delay
+            setTimeout(() => {
+                showVoilaTooltip();
+            }, 1000); // 1 second delay to allow users to see the animation and context changes
+        });
+    } else {
+        // Fallback if no element found
+        setTimeout(() => {
+            showVoilaTooltip();
+        }, 1000);
+    }
 }
 
 function showVoilaTooltip() {
@@ -2074,9 +2119,23 @@ function positionVoilaTooltip(tooltip, chatSidebar) {
     const sidebarRect = chatSidebar.getBoundingClientRect();
     const tooltipRect = tooltip.getBoundingClientRect();
     
-    // Position to the right of the chat sidebar, vertically centered
+    // Find the chat input to position tooltip closer to it
+    const chatInput = document.querySelector('.chat-input');
+    const chatInputRect = chatInput ? chatInput.getBoundingClientRect() : null;
+    
+    // Position to the right of the chat sidebar, but closer to the chat input
     const left = sidebarRect.right + 20; // 20px gap from sidebar
-    const top = sidebarRect.top + (sidebarRect.height / 2) - (tooltipRect.height / 2);
+    let top;
+    
+    if (chatInputRect) {
+        // Position the tooltip to align with the chat input area
+        top = chatInputRect.top - (tooltipRect.height / 2) + (chatInputRect.height / 2);
+        // Adjust upward a bit to be more visually connected to the input
+        top -= 20;
+    } else {
+        // Fallback to original centering
+        top = sidebarRect.top + (sidebarRect.height / 2) - (tooltipRect.height / 2);
+    }
     
     tooltip.style.left = left + 'px';
     tooltip.style.top = Math.max(20, top) + 'px'; // Ensure it doesn't go above viewport
@@ -2346,10 +2405,10 @@ function showCampaignBriefModal() {
         appModal.classList.add('visible');
     }, 10);
 
-    // 3. Show the 3rd tooltip next to this new modal
+    // 3. Show the 3rd tooltip next to this new modal after a longer delay
     setTimeout(() => {
         showThirdTourTooltip(appModal);
-    }, 10); // Delay to allow modal animation to mostly finish
+    }, 1200); // 1.2 second delay to allow users to see the modal animation and content
 }
 
 function showThirdTourTooltip(modal) {
@@ -2369,7 +2428,7 @@ function showThirdTourTooltip(modal) {
     tooltip.innerHTML = `
         <div class="tour-tooltip-content">
             <h3 class="tour-tooltip-title">Here's a Campaign Brief App</h3>
-            <p class="tour-tooltip-body">With an App, you can turn your ideas into comprehensive campaign briefs in minutes.</p>
+            <p class="tour-tooltip-body">By using an App, you have Jasper's marketing best practices already applied.</p>
             <div class="tour-tooltip-actions">
                 <button class="tour-next-btn" onclick="closeThirdTourTooltip()">Next</button>
             </div>
@@ -2447,7 +2506,7 @@ function showTourTooltipStep4(targetElement) {
         <div class="tour-tooltip-content">
             <button class="tour-tooltip-close" onclick="closeTour()">&times;</button>
             <h3 class="tour-tooltip-title">Step 4: Create multiple assets at once</h3>
-            <p class="tour-tooltip-body">Generate multiple Instagram posts at once with targeted messaging that aligns with your campaign strategy and brand voice.</p>
+            <p class="tour-tooltip-body">Scale your generations by creating multiple Instagram posts at once with targeted messaging that aligns with your campaign strategy and brand voice</p>
             <div class="tour-tooltip-actions">
                 <button class="tour-back-btn" onclick="goBackToTourStep3()">Back</button>
                 <button class="tour-next-btn" onclick="closeTourStep4()">Next</button>
@@ -2511,18 +2570,7 @@ function closeTourStep4() {
         console.log('Toolbar element not found!');
     }
     
-    // Start the 5th tour step
-    startTourStep5();
-}
-
-function startTourStep5() {
-    // Find and highlight the Website and Blog group
-    const websiteBlogGroup = document.querySelector('.website-blog .asset-cards-row');
-    if (!websiteBlogGroup) return;
-    websiteBlogGroup.classList.add('tour-highlight');
-
-    // Adjust canvas position to fit everything in viewport
-    // Pan left and down to accommodate the toolbar
+    // Minimal canvas adjustment - only pan to show the website section without excessive movement
     const canvasViewport = document.getElementById('canvasViewport');
     if (canvasViewport) {
         const currentTransform = canvasViewport.style.transform || 'translate(0px, 0px) scale(1)';
@@ -2533,9 +2581,38 @@ function startTourStep5() {
         let currentY = transformMatch ? parseFloat(transformMatch[2]) : 0;
         let currentScale = scaleMatch ? parseFloat(scaleMatch[1]) : 1;
         
-        // Pan left by 100px and down by 150px to clear top navigation
-        const newX = currentX - 100;
-        const newY = currentY + 150;
+        // Gentle pan right by 150px and up by 50px (reduced from 300px/100px)
+        const newX = currentX - 150;
+        const newY = currentY - 50;
+        
+        canvasViewport.style.transform = `translate(${newX}px, ${newY}px) scale(${currentScale})`;
+        updateCanvasPosition();
+    }
+    
+    // Start the 5th tour step
+    startTourStep5();
+}
+
+function startTourStep5() {
+    // Find and highlight the Website and Blog group
+    const websiteBlogGroup = document.querySelector('.website-blog .asset-cards-row');
+    if (!websiteBlogGroup) return;
+    websiteBlogGroup.classList.add('tour-highlight');
+
+    // Minimal adjustment to accommodate the toolbar without excessive movement
+    const canvasViewport = document.getElementById('canvasViewport');
+    if (canvasViewport) {
+        const currentTransform = canvasViewport.style.transform || 'translate(0px, 0px) scale(1)';
+        const transformMatch = currentTransform.match(/translate\(([^,]+),\s*([^)]+)\)/);
+        const scaleMatch = currentTransform.match(/scale\(([^)]+)\)/);
+        
+        let currentX = transformMatch ? parseFloat(transformMatch[1]) : 0;
+        let currentY = transformMatch ? parseFloat(transformMatch[2]) : 0;
+        let currentScale = scaleMatch ? parseFloat(scaleMatch[1]) : 1;
+        
+        // Gentle adjustment: pan left by 50px and down by 75px (reduced from 100px/150px)
+        const newX = currentX - 50;
+        const newY = currentY + 75;
         
         canvasViewport.style.transform = `translate(${newX}px, ${newY}px) scale(${currentScale})`;
     }
@@ -2558,7 +2635,7 @@ function showTourTooltipStep5(targetElement) {
         <div class="tour-tooltip-content">
             <button class="tour-tooltip-close" onclick="closeTour()">&times;</button>
             <h3 class="tour-tooltip-title">Step 5: Edit assets in bulk</h3>
-            <p class="tour-tooltip-body">Use the toolbar to quickly edit multiple assets at once.</p>
+            <p class="tour-tooltip-body">Use the toolbar or chat to quickly edit multiple assets at once</p>
             <div class="tour-tooltip-actions">
                 <button class="tour-back-btn" onclick="goBackToTourStep4()">Back</button>
                 <button class="tour-next-btn" onclick="closeTourStep5()">Finish</button>
@@ -2610,7 +2687,7 @@ function closeTourStep5() {
 
     // Add more delay before the final Jasper message appears
     setTimeout(() => {
-        const finalMessage = `When you're ready, start your own project in a fresh Canvas.
+        const finalMessage = `When you're ready, start your own project in a fresh Canvas. You can also learn more in our community.
                 <button 
                     onclick="createNewProject()" 
                     style="
@@ -2631,16 +2708,86 @@ function closeTourStep5() {
                     onmouseout="this.style.background='#F3F4F6'"
                 >
                     Create project
-                </button>`;
+                </button>
+                <a 
+                    href="#" 
+                    onclick="visitCommunity()" 
+                    style="
+                        color: #3B82F6; 
+                        text-decoration: underline; 
+                        cursor: pointer; 
+                        font-size: 14px;
+                        margin-top: 8px;
+                        display: block;
+                        text-align: center;
+                        transition: color 0.2s;
+                    "
+                    onmouseover="this.style.color='#2563EB'"
+                    onmouseout="this.style.color='#3B82F6'"
+                >
+                    Visit the Community
+                </a>`;
         
-        // Use the same animation as other Jasper messages
-        addMessageToChat('Jasper', finalMessage, true);
+        // Use custom styling for the final message (no gray background, black text)
+        addCustomFinalMessage('Jasper', finalMessage);
     }, 1200); // Increased delay from 500ms to 1200ms
 }
 
 function createNewProject() {
     // Placeholder for creating a new project
     console.log('Creating new project...');
+}
+
+function visitCommunity() {
+    // Placeholder for visiting the community
+    console.log('Visiting community...');
+    // You can replace this with the actual community URL
+    // window.open('https://community.jasper.ai', '_blank');
+}
+
+function addCustomFinalMessage(author, message) {
+    const chatContent = document.querySelector('.chat-content');
+    const greeting = document.querySelector('.jasper-greeting');
+    
+    // Hide greeting if this is the first message
+    if (greeting && greeting.style.display !== 'none') {
+        greeting.style.display = 'none';
+    }
+    
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'chat-message';
+    
+    // Custom styling with no background and black text
+    messageDiv.style.cssText = `
+        margin-bottom: 16px;
+        padding: 12px;
+        border-radius: 8px;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.5s ease;
+        margin-right: 20px;
+    `;
+    
+    messageDiv.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+            <div class="jasper-avatar"></div>
+            <span style="font-size: 13px; font-weight: 600; color: #262627;">${author}</span>
+        </div>
+        <div style="font-size: 14px; line-height: 1.5; color: #000000;">${message}</div>
+    `;
+    
+    chatContent.appendChild(messageDiv);
+    
+    // Animate in with smooth transition
+    setTimeout(() => {
+        messageDiv.style.opacity = '1';
+        messageDiv.style.transform = 'translateY(0)';
+    }, 100);
+    
+    // Scroll to bottom with smooth animation
+    setTimeout(() => {
+        chatContent.scrollTop = chatContent.scrollHeight;
+    }, 200);
 }
 
 // Back navigation functions for tour

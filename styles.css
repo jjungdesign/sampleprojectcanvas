@@ -348,7 +348,7 @@ body {
     margin-bottom: 8px;
     font-size: 14px;
     line-height: 1.5;
-    color: #374151;
+    color: #000000;
     max-width: none;
 }
 
@@ -1481,6 +1481,13 @@ body {
     transition: all 0.2s ease-in-out;
 }
 
+/* App card inside modal should be wider to accommodate content */
+.app-library-modal .app-card {
+    width: 280px;
+    height: auto;
+    min-height: 150px;
+}
+
 .app-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 24px rgba(0,0,0,0.1);
@@ -1533,6 +1540,10 @@ body {
     color: #6b7280;
     line-height: 1.4;
     margin: 0;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
 }
 
 .app-card.highlight {
@@ -1545,7 +1556,7 @@ body {
     position: fixed;
     top: 58px;
     left: 20px;
-    width: 450px;
+    width: 480px;
     height: calc(100vh - 78px);
     max-height: 800px;
     background: #fff;
@@ -1629,6 +1640,8 @@ body {
     color: #4b5563;
     line-height: 1.5;
     margin-bottom: 8px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .form-section {
@@ -1689,6 +1702,7 @@ body {
     white-space: nowrap;
     flex: 1;
     min-width: 0;
+    max-width: 280px;
 }
 
 .context-chip {
