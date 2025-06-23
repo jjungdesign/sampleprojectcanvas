@@ -1591,6 +1591,9 @@ function showTourTooltipStep2(targetElement) {
         existingTooltip.remove();
     }
     
+    // Show the full App modal immediately when tooltip appears
+    showCampaignBriefModalFirst();
+    
     // Create tooltip for step 2
     const tooltip = document.createElement('div');
     tooltip.className = 'tour-tooltip tour-tooltip-attached';
@@ -1601,7 +1604,7 @@ function showTourTooltipStep2(targetElement) {
             <p class="tour-tooltip-body">Open a Jasper App, like Campaign Brief, and fill in all input fields. This will build your first asset inside your project and kickstart your campaign.</p>
             <div class="tour-tooltip-actions">
                 <button class="tour-back-btn" onclick="goBackToTourStep1()">Back</button>
-                <button class="tour-next-btn" onclick="restartModalAnimation()">Show me how</button>
+                <button class="tour-next-btn" onclick="showAppLibraryStep()">Next</button>
             </div>
         </div>
         <div class="tour-tooltip-arrow"></div>
@@ -1623,6 +1626,101 @@ function showTourTooltipStep2(targetElement) {
     // Set up canvas movement tracking
     setupTooltipTracking(tooltip, targetElement);
     console.log('Tooltip tracking setup complete');
+}
+
+function showAppLibraryStep() {
+    // Remove the Step 2 tooltip
+    const tooltip = document.querySelector('.tour-tooltip');
+    if (tooltip) {
+        tooltip.remove();
+    }
+    
+    // Close the full App modal
+    const appModal = document.querySelector('.app-modal');
+    if (appModal) {
+        appModal.classList.remove('visible');
+        setTimeout(() => appModal.remove(), 200);
+    }
+    
+    // Show the small toolbar modal after a brief delay
+    setTimeout(() => {
+        showSmallToolbarModal();
+    }, 300);
+}
+
+function showAppLibraryTooltip() {
+    // Find the small toolbar modal to position tooltip relative to it
+    const toolbarModal = document.querySelector('.inline-flyin-modal');
+    if (!toolbarModal) return;
+    
+    // Create the new tooltip
+    const tooltip = document.createElement('div');
+    tooltip.className = 'tour-tooltip tour-tooltip-attached';
+    tooltip.innerHTML = `
+        <div class="tour-tooltip-content">
+            <button class="tour-tooltip-close" onclick="closeTour()">&times;</button>
+            <h3 class="tour-tooltip-title">App Library</h3>
+            <p class="tour-tooltip-body">You can find the Campaign Brief App and many other Apps here.</p>
+            <div class="tour-tooltip-actions">
+                <button class="tour-back-btn" onclick="goBackToStep2FromLibrary()">Back</button>
+                <button class="tour-next-btn" onclick="closeAppLibraryAndGoToStep3()">Next</button>
+            </div>
+        </div>
+        <div class="tour-tooltip-arrow arrow-left"></div>
+    `;
+    
+    document.body.appendChild(tooltip);
+    
+    // Position tooltip to the right of the small modal
+    const modalRect = toolbarModal.getBoundingClientRect();
+    const tooltipWidth = 280;
+    const tooltipHeight = 120;
+    
+    const left = modalRect.right + 20;
+    const top = modalRect.top + (modalRect.height / 2) - (tooltipHeight / 2);
+    
+    tooltip.style.left = left + 'px';
+    tooltip.style.top = top + 'px';
+    tooltip.style.width = tooltipWidth + 'px';
+    tooltip.style.display = 'block';
+    tooltip.style.visibility = 'visible';
+    tooltip.style.opacity = '1';
+    tooltip.style.transform = 'translateY(0)';
+}
+
+function goBackToStep2FromLibrary() {
+    // Close the app library tooltip and modal
+    const tooltip = document.querySelector('.tour-tooltip');
+    if (tooltip) {
+        tooltip.remove();
+    }
+    
+    const toolbarModal = document.querySelector('.inline-flyin-modal');
+    if (toolbarModal) {
+        toolbarModal.remove();
+    }
+    
+    // Show the Step 2 tooltip and full modal again
+    const campaignBriefCard = document.querySelector('.campaign-brief');
+    if (campaignBriefCard) {
+        showTourTooltipStep2(campaignBriefCard);
+    }
+}
+
+function closeAppLibraryAndGoToStep3() {
+    // Close the app library tooltip and modal
+    const tooltip = document.querySelector('.tour-tooltip');
+    if (tooltip) {
+        tooltip.remove();
+    }
+    
+    const toolbarModal = document.querySelector('.inline-flyin-modal');
+    if (toolbarModal) {
+        toolbarModal.remove();
+    }
+    
+    // Proceed to Step 3
+    goToTourStep3();
 }
 
 function positionTourTooltipStep2(tooltip, targetElement) {
@@ -1723,10 +1821,24 @@ function removeTooltipTracking() {
 
 function goToTourStep3() {
     console.log('🐛 DEBUG: goToTourStep3 updated function called - Blog Post reset');
+    
     // Remove existing tooltip
     const tooltip = document.querySelector('.tour-tooltip');
     if (tooltip) {
         tooltip.remove();
+    }
+    
+    // Close the App modal
+    const appModal = document.querySelector('.app-modal');
+    if (appModal) {
+        appModal.classList.remove('visible');
+        setTimeout(() => appModal.remove(), 200);
+    }
+    
+    // Close any small toolbar modals
+    const toolbarModal = document.querySelector('.inline-flyin-modal');
+    if (toolbarModal) {
+        toolbarModal.remove();
     }
     
     // Remove highlight from all previously highlighted elements
@@ -2245,9 +2357,67 @@ function restartModalAnimation() {
 }
 
 function showAppModalAnimation() {
-    // This is the renamed function that contains the logic
-    // from the old closeTourStep2 function.
-    
+    // REVERSED SEQUENCE: Show full Campaign Brief modal FIRST, then small toolbar modal
+    showCampaignBriefModalFirst();
+}
+
+function showCampaignBriefModalFirst() {
+    // 1. Create the full Campaign Brief modal first
+    const appModal = document.createElement('div');
+    appModal.className = 'app-modal';
+    appModal.innerHTML = `
+        <div class="app-modal-header">
+            <div class="app-modal-title-group">
+                <div class="app-modal-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+                </div>
+                <span class="app-modal-title">Campaign Brief</span>
+            </div>
+            <div class="app-modal-actions">
+                 <button class="app-modal-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg></button>
+                 <button class="app-modal-btn"><svg width="18" height="18" viewBox="0 0 16 16"><path fill="currentColor" d="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM2 8a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm14 0a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/></svg></button>
+                <button class="app-modal-btn" onclick="this.closest('.app-modal').remove()"><svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor"><path d="M12.7.3a1 1 0 0 1 0 1.4L9.4 5l3.3 3.3a1 1 0 0 1-1.4 1.4L8 6.4l-3.3 3.3a1 1 0 0 1-1.4-1.4L6.6 5 3.3 1.7a1 1 0 0 1 1.4-1.4L8 3.6l3.3-3.3a1 1 0 0 1 1.4 0z"/></svg></button>
+            </div>
+        </div>
+        <div class="app-modal-body">
+            <p class="app-modal-description">Create comprehensive campaign briefs that outline strategy, messaging, and key deliverables</p>
+            <div class="form-section">
+                 <div class="dropdown-field">
+                    <span class="form-section-value">Whisker Voice • Pet parents • English... • 1...</span>
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor"><path d="M4 6l4 4 4-4"/></svg>
+                </div>
+            </div>
+            <div class="form-section">
+                <div class="form-section-header">Add project assets for context</div>
+            </div>
+            <div class="dropdown-field">
+                <span class="form-section-title">Topic</span>
+                <span class="form-section-value">Whisker & Tails Summer Flavors</span>
+            </div>
+            <div class="dropdown-field">
+                <span class="form-section-title">Outline</span>
+                <span class="form-section-value">I. Introduction - Briefly introduce...</span>
+            </div>
+            <div class="dropdown-field">
+                <span class="form-section-title">Create an image</span>
+                <span class="form-section-value">Based on information provided</span>
+            </div>
+        </div>
+        <div class="app-modal-footer">
+            <button class="generate-btn">Generate now</button>
+        </div>
+    `;
+    document.body.appendChild(appModal);
+
+    // 2. Show the full modal with smooth transition
+    setTimeout(() => {
+        appModal.classList.add('visible');
+    }, 10);
+
+    // No additional animations - just show the modal
+}
+
+function showSmallToolbarModal() {
     // Find the cube icon in the action bar
     const cubeBtn = document.querySelector('.action-bar .cube-btn');
     if (!cubeBtn) return;
@@ -2271,7 +2441,7 @@ function showAppModalAnimation() {
     modal.className = 'inline-flyin-modal app-library-modal';
     modal.style.position = 'fixed';
     modal.style.left = modalLeft + 'px';
-    modal.style.top = (vh - bottomOffset) + 'px'; // Start at the bottom, just above the action bar
+    modal.style.top = modalTop + 'px';
     modal.style.width = modalWidth + 'px';
     modal.style.height = modalHeight + 'px';
     modal.style.background = '#fff';
@@ -2279,7 +2449,7 @@ function showAppModalAnimation() {
     modal.style.boxShadow = '0 8px 32px rgba(0,0,0,0.18)';
     modal.style.zIndex = 20000;
     modal.style.overflow = 'hidden';
-    modal.style.transition = 'all 0.5s cubic-bezier(.4,1,.4,1)';
+    modal.style.transition = 'all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)';
     modal.style.display = 'flex';
     modal.style.alignItems = 'center';
     modal.style.justifyContent = 'center';
@@ -2306,42 +2476,25 @@ function showAppModalAnimation() {
     `;
     document.body.appendChild(modal);
 
-    // Animate to just above the action bar (slide up)
+    // Animate the modal in with smooth slide-up transition
     setTimeout(() => {
-        modal.style.top = modalTop + 'px';
         modal.style.opacity = '1';
         modal.style.transform = 'translateY(0)';
+        
+        // Show tooltip after modal animation is complete
+        setTimeout(() => {
+            showAppLibraryTooltip();
+        }, 450); // Show tooltip after the 0.4s transition + small buffer
     }, 10);
 
     // Optional: close modal on click outside
-    setTimeout(() => {
-        // --- Start of new animation sequence ---
-        
-        // 1. Highlight the card after a shorter delay
-        setTimeout(() => {
-            const card = modal.querySelector('.app-card');
-            if (card) {
-                card.classList.add('highlight');
-            }
-        }, 200);
-
-        // 2. Show the new App Modal after another delay
-        setTimeout(() => {
-            showCampaignBriefModal();
-        }, 1600);
-
-        // --- End of new animation sequence ---
-
-        function closeModalOnClick(e) {
-            if (!modal.contains(e.target)) {
-                modal.remove();
-                document.removeEventListener('mousedown', closeModalOnClick);
-            }
+    function closeModalOnClick(e) {
+        if (!modal.contains(e.target)) {
+            modal.remove();
+            document.removeEventListener('mousedown', closeModalOnClick);
         }
-        document.addEventListener('mousedown', closeModalOnClick);
-        // We no longer show the 3rd tooltip here immediately
-        // showThirdTourTooltip(modal);
-    }, 500);
+    }
+    document.addEventListener('mousedown', closeModalOnClick);
 }
 
 function showCampaignBriefModal() {
@@ -2687,7 +2840,7 @@ function closeTourStep5() {
 
     // Add more delay before the final Jasper message appears
     setTimeout(() => {
-        const finalMessage = `When you're ready, start your own project in a fresh Canvas. You can also learn more in our community.
+        const finalMessage = `When you're ready, start your own project in a new tab. You can also explore more projects in our community.
                 <button 
                     onclick="createNewProject()" 
                     style="
