@@ -2687,7 +2687,7 @@ function closeTourStep5() {
 
     // Add more delay before the final Jasper message appears
     setTimeout(() => {
-        const finalMessage = `When you're ready, start your own project in a fresh Canvas. You can also learn more in our community.
+        const finalMessage = `When you're ready, start your own project in a new tab. You can also explore more projects in our community.
                 <button 
                     onclick="createNewProject()" 
                     style="
