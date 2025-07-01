@@ -426,43 +426,49 @@ body {
 }
 
 .chat-input {
-    padding: 16px;
-    border-top: 1px solid #E5E7EB;
+    padding: 20px;
     background: #FFFFFF;
 }
 
 .input-container {
     position: relative;
-    margin-bottom: 16px;
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 12px;
+    padding: 16px;
+    transition: all 0.2s ease;
+}
+
+.input-container:hover {
+    border-color: #D1D5DB;
+}
+
+.input-container:focus-within {
+    border-color: #D1D5DB;
 }
 
 .input-field {
-    background: #F9FAFB;
-    border: 1px solid #E5E7EB;
-    border-radius: 8px;
-    padding: 16px;
+    background: transparent;
+    border: none;
+    padding: 0;
     width: 100%;
-    font-size: 15px;
-    line-height: 1.4;
-    color: #000000;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #1F2937;
     font-family: inherit;
     outline: none;
-    transition: border-color 0.2s;
     resize: none;
-    min-height: 80px;
+    min-height: 60px;
+    max-height: 120px;
     vertical-align: top;
     box-sizing: border-box;
-}
-
-.input-field:focus {
-    border-color: #3B82F6;
-    background: #FFFFFF;
+    margin-bottom: 12px;
 }
 
 .input-field::placeholder {
-    color: #6B7280;
-    font-size: 15px;
-    line-height: 1.4;
+    color: #9CA3AF;
+    font-size: 14px;
+    line-height: 1.5;
 }
 
 .input-actions {
@@ -474,68 +480,69 @@ body {
 .input-actions-left {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
 }
 
 .input-actions-right {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
 }
 
 .input-btn {
-    background: none;
-    border: none;
-    padding: 8px;
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    padding: 0;
     cursor: pointer;
-    border-radius: 6px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background-color 0.2s;
-    color: #6B7280;
-    width: 32px;
-    height: 32px;
+    transition: all 0.2s;
+    color: #374151;
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+    font-weight: 400;
 }
 
 .input-btn:hover {
-    background-color: #F3F4F6;
-    color: #374151;
+    background-color: #F9FAFB;
+    border-color: #D1D5DB;
 }
 
 .agents-btn {
-    background: none;
-    border: none;
-    padding: 6px 12px;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 500;
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 15px;
+    font-weight: 400;
     cursor: pointer;
-    color: #6B7280;
+    color: #374151;
     display: flex;
     align-items: center;
     gap: 6px;
     transition: all 0.2s;
-    height: 32px;
+    height: 36px;
 }
 
 .agents-btn:hover {
-    background-color: #F3F4F6;
-    color: #374151;
+    background-color: #F9FAFB;
+    border-color: #D1D5DB;
 }
 
 .agents-btn::before {
-    content: "🔗";
-    font-size: 12px;
+    display: none;
 }
 
 .connect-integrations-btn {
     background: #3B82F6;
     color: white;
     border: none;
-    padding: 6px 12px;
-    border-radius: 6px;
-    font-size: 13px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s;
@@ -547,22 +554,28 @@ body {
 }
 
 .send-btn {
-    background: #F3F4F6;
-    color: #6B7280;
-    width: 32px;
-    height: 32px;
-    border-radius: 6px;
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    color: #374151;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: none;
     cursor: pointer;
     transition: all 0.2s;
 }
 
 .send-btn:hover {
-    background: #E5E7EB;
-    color: #374151;
+    background: #F9FAFB;
+    border-color: #D1D5DB;
+}
+
+.send-btn:disabled {
+    background: #F3F4F6;
+    color: #9CA3AF;
+    cursor: not-allowed;
 }
 
 /* Hide old greeting styles */

@@ -1933,12 +1933,11 @@ function addCampaignBriefPillToChat() {
         background: #3B82F6;
         color: white;
         border-radius: 6px;
-        padding: 4px 8px;
+        padding: 2px 6px;
         font-size: 11px;
         font-weight: 500;
-        opacity: 0;
-        transform: translateY(-5px);
-        transition: all 0.3s ease;
+        opacity: 1;
+        transform: translateY(0);
         position: absolute;
         left: 12px;
         top: 12px;
@@ -1963,22 +1962,18 @@ function addCampaignBriefPillToChat() {
     
     if (inputField) {
         // Adjust padding to make room for pill at top and move text below
-        inputField.style.paddingLeft = '16px';
-        inputField.style.paddingTop = '44px'; // Space for pill + gap
+        inputField.style.paddingLeft = '0px';
+        inputField.style.paddingTop = '28px'; // Reduced space for smaller pill + gap
         inputField.style.paddingBottom = '16px';
         inputField.style.paddingRight = '16px';
-        inputField.style.minHeight = '80px';
+        inputField.style.minHeight = '60px';
         inputField.style.boxSizing = 'border-box';
         inputField.style.resize = 'none';
         inputField.style.lineHeight = '1.5';
         inputField.style.fontSize = '14px'; // Match Jasper message font size
     }
 
-    // Animate the pill in
-    setTimeout(() => {
-        pill.style.opacity = '1';
-        pill.style.transform = 'translateY(0)';
-    }, 50);
+    // Pill appears immediately without animation
 
     // Add click handler for the close button
     const closeBtn = pill.querySelector('span:last-child');
@@ -1995,19 +1990,17 @@ function removeCampaignBriefPill() {
     const inputField = document.querySelector('.chat-input .input-field');
     
     if (pill) {
-        // Animate out
-        pill.style.opacity = '0';
-        pill.style.transform = 'translateY(-5px)';
-        setTimeout(() => pill.remove(), 300);
+        // Remove immediately without animation
+        pill.remove();
     }
     
     if (inputField) {
-        // Reset input field styling to new larger defaults
-        inputField.style.paddingLeft = '16px';
-        inputField.style.paddingTop = '16px';
-        inputField.style.paddingBottom = '16px';
-        inputField.style.paddingRight = '16px';
-        inputField.style.minHeight = '80px';
+        // Reset input field styling to default state
+        inputField.style.paddingLeft = '0px';
+        inputField.style.paddingTop = '0px';
+        inputField.style.paddingBottom = '0px';
+        inputField.style.paddingRight = '0px';
+        inputField.style.minHeight = '60px';
         inputField.style.fontSize = '14px'; // Keep consistent font size
         inputField.style.lineHeight = '1.5';
     }
