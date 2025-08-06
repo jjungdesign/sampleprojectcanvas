@@ -18,6 +18,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize tour functionality
     initializeTour();
 
+
+
     // Element selectors
     const tourStartButton = document.getElementById('tourStartButton');
     const blogPostCard = document.getElementById('tour-blog-post-card');
@@ -45,16 +47,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Event Listeners
-    if (tourStartButton && blogPostCard) {
-        tourStartButton.addEventListener('click', () => {
-            blogPostCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            blogPostCard.classList.add('highlight-tour-step');
-            setTimeout(() => {
-                blogPostCard.classList.remove('highlight-tour-step');
-            }, 2000);
-        });
-    }
+
 
     // Initialize
     updateZoomLevelIndicator();
@@ -1195,7 +1188,7 @@ function showProjectSettings() {
                         color: #6B7280;
                         margin-bottom: 2px;
                     ">Title</div>
-                    <input type="text" value="Summer of Sniffs Campaign" placeholder="Name your project" style="
+                    <input type="text" value="Sample Project App Demo" placeholder="Name your project" style="
                         width: 100%;
                         border: none;
                         outline: none;
@@ -1467,6 +1460,16 @@ function showDelayedJasperMessage() {
                 thirdText.style.opacity = '1';
                 thirdText.style.transform = 'translateY(0)';
             }, 100);
+            
+            // Add Start Tour button right after the third paragraph
+            setTimeout(() => {
+                const tourCtaButton = document.getElementById('tourStartButton');
+                if (tourCtaButton) {
+                    tourCtaButton.style.transition = 'all 0.6s ease';
+                    tourCtaButton.style.opacity = '1';
+                    tourCtaButton.style.transform = 'translateY(0)';
+                }
+            }, 600); // 0.6 seconds after the third paragraph appears
         }, 1000); // 1 second after the second paragraph
     }, 1000); // 1 second delay for the second paragraph
 }
@@ -1561,24 +1564,16 @@ function closeTourTooltip() {
 
 function startTourStep2() {
     console.log('Starting tour step 2');
-    // Find and highlight the Campaign Brief card
-    const campaignBriefCard = document.querySelector('.campaign-brief');
-    console.log('Campaign brief card found:', campaignBriefCard);
-    if (!campaignBriefCard) {
-        console.error('Campaign brief card not found!');
+    // Find the cube button (App icon) in the action bar
+    const cubeBtn = document.querySelector('.action-bar .cube-btn');
+    console.log('Cube button found:', cubeBtn);
+    if (!cubeBtn) {
+        console.error('Cube button not found!');
         return;
     }
     
-    // Add highlight class
-    campaignBriefCard.classList.add('tour-highlight');
-    console.log('Added tour-highlight class');
-    
-    // Pan canvas to align the Campaign Brief card at the top
-    panToElement(campaignBriefCard, () => {
-        console.log('Pan animation complete, showing tooltip');
-        // Show the second tooltip after panning is complete
-        showTourTooltipStep2(campaignBriefCard);
-    }, true);
+    // Show the second tooltip positioned above the cube button
+    showTourTooltipStep2(cubeBtn);
 }
 
 function showTourTooltipStep2(targetElement) {
@@ -1593,7 +1588,7 @@ function showTourTooltipStep2(targetElement) {
     
     // Create tooltip for step 2
     const tooltip = document.createElement('div');
-    tooltip.className = 'tour-tooltip tour-tooltip-attached';
+    tooltip.className = 'tour-tooltip';
     tooltip.innerHTML = `
         <div class="tour-tooltip-content">
             <button class="tour-tooltip-close" onclick="closeTour()">&times;</button>
@@ -1601,7 +1596,7 @@ function showTourTooltipStep2(targetElement) {
             <p class="tour-tooltip-body">Open a Jasper App, like Campaign Brief, and fill in all input fields. This will build your first asset inside your project and kickstart your campaign.</p>
             <div class="tour-tooltip-actions">
                 <button class="tour-back-btn" onclick="goBackToTourStep1()">Back</button>
-                <button class="tour-next-btn" onclick="restartModalAnimation()">Show me how</button>
+                <button class="tour-next-btn" onclick="goToTourStep3()">Next</button>
             </div>
         </div>
         <div class="tour-tooltip-arrow"></div>
@@ -1613,16 +1608,9 @@ function showTourTooltipStep2(targetElement) {
     document.body.appendChild(tooltip);
     console.log('Tooltip added to body');
     
-    // Store reference to target element for repositioning
-    tooltip.targetElement = targetElement;
-    
-    // Position the tooltip to the right of the Campaign Brief card
-    positionTourTooltipStep2(tooltip, targetElement);
+    // Position the tooltip above the cube button
+    positionTourTooltipAboveActionBar(tooltip, targetElement);
     console.log('Tooltip positioned');
-    
-    // Set up canvas movement tracking
-    setupTooltipTracking(tooltip, targetElement);
-    console.log('Tooltip tracking setup complete');
 }
 
 function positionTourTooltipStep2(tooltip, targetElement) {
@@ -1647,6 +1635,34 @@ function positionTourTooltipStep2(tooltip, targetElement) {
         visibility: tooltip.style.visibility,
         opacity: tooltip.style.opacity
     });
+}
+
+function positionTourTooltipAboveActionBar(tooltip, targetElement) {
+    console.log('Positioning tooltip above action bar for element:', targetElement);
+    const targetRect = targetElement.getBoundingClientRect();
+    console.log('Target element rect:', targetRect);
+    
+    // Position above the cube button with some spacing
+    const left = targetRect.left + (targetRect.width / 2) - 160; // Center the tooltip (320px width / 2)
+    const top = targetRect.top - 180 - 20; // 180px above the button with 20px gap
+    
+    console.log('Calculated position - left:', left, 'top:', top);
+    
+    tooltip.style.left = left + 'px';
+    tooltip.style.top = top + 'px';
+    tooltip.style.width = '320px';
+    
+    // Position the arrow to point down at the button
+    const arrow = tooltip.querySelector('.tour-tooltip-arrow');
+    if (arrow) {
+        arrow.style.left = '50%';
+        arrow.style.top = '100%';
+        arrow.style.transform = 'translateX(-50%) rotate(45deg)';
+        arrow.style.border = 'none';
+        arrow.style.backgroundColor = '#FFFFFF';
+    }
+    
+    console.log('Tooltip positioned at:', tooltip.style.left, tooltip.style.top);
 }
 
 function panToElement(element, callback, alignTop = false) {
@@ -1722,7 +1738,7 @@ function removeTooltipTracking() {
 }
 
 function goToTourStep3() {
-    console.log('🐛 DEBUG: goToTourStep3 updated function called - Blog Post reset');
+    console.log('🐛 DEBUG: goToTourStep3 updated function called - Campaign Brief');
     // Remove existing tooltip
     const tooltip = document.querySelector('.tour-tooltip');
     if (tooltip) {
@@ -1735,21 +1751,20 @@ function goToTourStep3() {
         element.classList.remove('tour-highlight');
     });
 
-    // Find and highlight the Blog Post card (reset to beginning)
-    const blogPostCard = document.querySelector('#tour-blog-post-card');
-    if (!blogPostCard) {
-        console.error('Blog post card not found for tour!');
+    // Find the Campaign Brief card (no highlighting)
+    const campaignBriefCard = document.querySelector('.campaign-brief');
+    if (!campaignBriefCard) {
+        console.error('Campaign brief card not found for tour!');
         return;
     }
-    blogPostCard.classList.add('tour-highlight');
 
     // Pan to the element if needed and show the new tooltip
-    panToElement(blogPostCard, () => {
-        showBlogPostTooltip(blogPostCard);
+    panToElement(campaignBriefCard, () => {
+        showCampaignBriefTooltip(campaignBriefCard);
     }, true);
 }
 
-function showBlogPostTooltip(targetElement) {
+function showCampaignBriefTooltip(targetElement) {
     // Remove any existing tooltip
     const existingTooltip = document.querySelector('.tour-tooltip');
     if (existingTooltip) {
@@ -1785,17 +1800,7 @@ function showCampaignBriefChatDemo() {
     const tooltip = document.querySelector('.tour-tooltip');
     if (tooltip) tooltip.remove();
     
-    // Gentle canvas adjustment to better showcase the demo
-    const canvasViewport = document.getElementById('canvasViewport');
-    if (canvasViewport) {
-        // Pan 150px to the left from current position (reduced from 300px)
-        const newX = currentX + 150;
-        animateCanvasTo(newX, currentY, 600);
-    }
-    
-    // Add delay before highlighting campaign brief
-    setTimeout(() => {
-        // 2. Remove highlight from ALL possible blog post selectors
+    // 2. Remove highlight from ALL possible blog post selectors
     console.log('Looking for blog post cards to remove highlights...');
     
     // Try multiple selectors for blog post
@@ -1837,9 +1842,6 @@ function showCampaignBriefChatDemo() {
         campaignBriefCard.classList.add('tour-highlight');
         console.log('Added highlight to campaign brief');
         
-        // Pan canvas to better show the campaign brief document
-        panToCampaignBrief(campaignBriefCard);
-        
         // Add the campaign brief pill to the chat immediately
         addCampaignBriefPillToChat();
     } else {
@@ -1851,11 +1853,10 @@ function showCampaignBriefChatDemo() {
         });
     }
 
-        // 3. After a delay, change the "Ask jasper anything" text and show Voilà tooltip
-        setTimeout(() => {
-            updateChatInputText();
-        }, 800);
-    }, 700); // Wait 700ms after canvas pan (which takes 600ms) before highlighting
+    // 4. After a delay, change the "Ask jasper anything" text and show Voilà tooltip
+    setTimeout(() => {
+        updateChatInputText();
+    }, 800);
 }
 
 function panToCampaignBrief(campaignBriefCard) {
@@ -2090,8 +2091,8 @@ function showVoilaTooltip() {
     tooltip.innerHTML = `
         <div class="tour-tooltip-content">
             <button class="tour-tooltip-close" onclick="closeVoilaTooltip()">&times;</button>
-            <h3 class="tour-tooltip-title">Voilà!</h3>
-            <p class="tour-tooltip-body">Recap: The Campaign Brief was selected in Canvas and used as context in chat to create a blog post.</p>
+            <h3 class="tour-tooltip-title">Quick Recap</h3>
+            <p class="tour-tooltip-body">The Campaign Brief was selected in Canvas and used as context in chat to create a blog post.</p>
             <div class="tour-tooltip-actions">
                 <button class="tour-next-btn" onclick="goToStep4FromVoila()">Next</button>
             </div>
@@ -2215,257 +2216,7 @@ function resetChatInputToDefault() {
     }
 }
 
-function restartModalAnimation() {
-    // 1. Remove any existing tooltips
-    const tooltip = document.querySelector('.tour-tooltip');
-    if (tooltip) tooltip.remove();
 
-    // 2. Remove the large app modal
-    const appModal = document.querySelector('.app-modal');
-    if (appModal) {
-        appModal.classList.remove('visible');
-        setTimeout(() => appModal.remove(), 600);
-    }
-    
-    // 3. Remove the small fly-in modal from the toolbar
-    const flyInModal = document.querySelector('.inline-flyin-modal');
-    if (flyInModal) flyInModal.remove();
-
-    // 4. Restart the animation after a short delay to allow modals to close
-    setTimeout(() => {
-        showAppModalAnimation();
-    }, 300);
-}
-
-function showAppModalAnimation() {
-    // This is the renamed function that contains the logic
-    // from the old closeTourStep2 function.
-    
-    // Find the cube icon in the action bar
-    const cubeBtn = document.querySelector('.action-bar .cube-btn');
-    if (!cubeBtn) return;
-    const cubeRect = cubeBtn.getBoundingClientRect();
-    const actionBar = document.querySelector('.action-bar');
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    const modalWidth = 480;
-    const modalHeight = 220;
-    let bottomOffset = 40;
-    if (actionBar) {
-        const actionBarRect = actionBar.getBoundingClientRect();
-        bottomOffset = (vh - actionBarRect.top) + 8; // 8px above the action bar
-    }
-    // Calculate horizontal center based on cube icon
-    const modalLeft = Math.round(cubeRect.left + cubeRect.width/2 - modalWidth/2);
-    const modalTop = vh - bottomOffset - modalHeight;
-
-    // Create the modal element
-    const modal = document.createElement('div');
-    modal.className = 'inline-flyin-modal app-library-modal';
-    modal.style.position = 'fixed';
-    modal.style.left = modalLeft + 'px';
-    modal.style.top = (vh - bottomOffset) + 'px'; // Start at the bottom, just above the action bar
-    modal.style.width = modalWidth + 'px';
-    modal.style.height = modalHeight + 'px';
-    modal.style.background = '#fff';
-    modal.style.borderRadius = '16px';
-    modal.style.boxShadow = '0 8px 32px rgba(0,0,0,0.18)';
-    modal.style.zIndex = 20000;
-    modal.style.overflow = 'hidden';
-    modal.style.transition = 'all 0.5s cubic-bezier(.4,1,.4,1)';
-    modal.style.display = 'flex';
-    modal.style.alignItems = 'center';
-    modal.style.justifyContent = 'center';
-    modal.style.opacity = '0';
-    modal.style.transform = 'translateY(40px)';
-    modal.innerHTML = `
-        <div class="app-card">
-            <div class="app-card-header">
-                <div class="app-card-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="m17 2 4 4-4 4"/>
-                        <path d="M3 11v-1a4 4 0 0 1 4-4h14"/>
-                        <path d="m7 22-4-4 4-4"/>
-                        <path d="M21 13v1a4 4 0 0 1-4 4H3"/>
-                    </svg>
-                </div>
-                <div class="app-card-tag">Popular</div>
-            </div>
-            <div class="app-card-body">
-                <h3 class="app-card-title">Campaign Brief</h3>
-                <p class="app-card-description">Create comprehensive campaign briefs that outline strategy, messaging, and key deliverables</p>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-
-    // Animate to just above the action bar (slide up)
-    setTimeout(() => {
-        modal.style.top = modalTop + 'px';
-        modal.style.opacity = '1';
-        modal.style.transform = 'translateY(0)';
-    }, 10);
-
-    // Optional: close modal on click outside
-    setTimeout(() => {
-        // --- Start of new animation sequence ---
-        
-        // 1. Highlight the card after a shorter delay
-        setTimeout(() => {
-            const card = modal.querySelector('.app-card');
-            if (card) {
-                card.classList.add('highlight');
-            }
-        }, 200);
-
-        // 2. Show the new App Modal after another delay
-        setTimeout(() => {
-            showCampaignBriefModal();
-        }, 1600);
-
-        // --- End of new animation sequence ---
-
-        function closeModalOnClick(e) {
-            if (!modal.contains(e.target)) {
-                modal.remove();
-                document.removeEventListener('mousedown', closeModalOnClick);
-            }
-        }
-        document.addEventListener('mousedown', closeModalOnClick);
-        // We no longer show the 3rd tooltip here immediately
-        // showThirdTourTooltip(modal);
-    }, 500);
-}
-
-function showCampaignBriefModal() {
-    // Close the small toolbar modal as this one opens
-    const toolbarModal = document.querySelector('.inline-flyin-modal');
-    if (toolbarModal) {
-        toolbarModal.style.opacity = '0';
-        toolbarModal.style.transform = 'translateY(40px)';
-        setTimeout(() => toolbarModal.remove(), 500);
-    }
-
-    // 1. Create the modal element
-    const appModal = document.createElement('div');
-    appModal.className = 'app-modal';
-    appModal.innerHTML = `
-        <div class="app-modal-header">
-            <div class="app-modal-title-group">
-                <div class="app-modal-icon">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
-                </div>
-                <span class="app-modal-title">Campaign Brief</span>
-            </div>
-            <div class="app-modal-actions">
-                 <button class="app-modal-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg></button>
-                 <button class="app-modal-btn"><svg width="18" height="18" viewBox="0 0 16 16"><path fill="currentColor" d="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM2 8a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm14 0a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/></svg></button>
-                <button class="app-modal-btn" onclick="this.closest('.app-modal').remove()"><svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor"><path d="M12.7.3a1 1 0 0 1 0 1.4L9.4 5l3.3 3.3a1 1 0 0 1-1.4 1.4L8 6.4l-3.3 3.3a1 1 0 0 1-1.4-1.4L6.6 5 3.3 1.7a1 1 0 0 1 1.4-1.4L8 3.6l3.3-3.3a1 1 0 0 1 1.4 0z"/></svg></button>
-            </div>
-        </div>
-        <div class="app-modal-body">
-            <p class="app-modal-description">Create comprehensive campaign briefs that outline strategy, messaging, and key deliverables</p>
-            <div class="form-section">
-                 <div class="dropdown-field">
-                    <span class="form-section-value">Whisker Voice • Pet parents • English... • 1...</span>
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor"><path d="M4 6l4 4 4-4"/></svg>
-                </div>
-            </div>
-            <div class="form-section">
-                <div class="form-section-header">Add project assets for context</div>
-            </div>
-            <div class="dropdown-field">
-                <span class="form-section-title">Topic</span>
-                <span class="form-section-value">Whisker & Tails Summer Flavors</span>
-            </div>
-            <div class="dropdown-field">
-                <span class="form-section-title">Outline</span>
-                <span class="form-section-value">I. Introduction - Briefly introduce...</span>
-            </div>
-            <div class="dropdown-field">
-                <span class="form-section-title">Create an image</span>
-                <span class="form-section-value">Based on information provided</span>
-            </div>
-        </div>
-        <div class="app-modal-footer">
-            <button class="generate-btn">Generate now</button>
-        </div>
-    `;
-    document.body.appendChild(appModal);
-
-    // 2. Animate it into view
-    setTimeout(() => {
-        appModal.classList.add('visible');
-    }, 10);
-
-    // 3. Show the 3rd tooltip next to this new modal after a longer delay
-    setTimeout(() => {
-        showThirdTourTooltip(appModal);
-    }, 1200); // 1.2 second delay to allow users to see the modal animation and content
-}
-
-function showThirdTourTooltip(modal) {
-    // Remove any existing tooltip
-    const existingTooltip = document.querySelector('.tour-tooltip');
-    if (existingTooltip) existingTooltip.remove();
-    
-    // Also remove highlight from the blog post card
-    const blogPostCard = document.querySelector('#tour-blog-post-card');
-    if (blogPostCard) {
-        blogPostCard.classList.remove('tour-highlight');
-    }
-
-    // Create tooltip
-    const tooltip = document.createElement('div');
-    tooltip.className = 'tour-tooltip tour-tooltip-attached';
-    tooltip.innerHTML = `
-        <div class="tour-tooltip-content">
-            <h3 class="tour-tooltip-title">Here's a Campaign Brief App</h3>
-            <p class="tour-tooltip-body">By using an App, you have Jasper's marketing best practices already applied.</p>
-            <div class="tour-tooltip-actions">
-                <button class="tour-next-btn" onclick="closeThirdTourTooltip()">Next</button>
-            </div>
-        </div>
-        <div class="tour-tooltip-arrow arrow-top"></div>
-    `;
-    document.body.appendChild(tooltip);
-
-    // Position the tooltip vertically centered and close to the modal
-    function positionTooltip() {
-        const modalRect = modal.getBoundingClientRect();
-        const tooltipWidth = 280;
-        const tooltipHeight = 120;
-        // Vertically center and bring close (28px gap)
-        const left = modalRect.right + 28;
-        const top = modalRect.top + (modalRect.height / 2) - (tooltipHeight / 2);
-        tooltip.style.left = left + 'px';
-        tooltip.style.top = top + 'px';
-        tooltip.style.width = tooltipWidth + 'px';
-        tooltip.style.display = 'block';
-        tooltip.style.visibility = 'visible';
-        tooltip.style.opacity = '1';
-        tooltip.style.transform = 'translateY(0)';
-    }
-    positionTooltip();
-    window.addEventListener('resize', positionTooltip);
-    // Store for tracking
-    tooltip.targetElement = modal;
-}
-
-function closeThirdTourTooltip() {
-    const tooltip = document.querySelector('.tour-tooltip');
-    if (tooltip) tooltip.remove();
-
-    // Also close the main App Modal
-    const appModal = document.querySelector('.app-modal');
-    if (appModal) {
-        appModal.classList.remove('visible');
-        setTimeout(() => appModal.remove(), 200); // Match CSS transition
-    }
-
-    // Go to tour step 3
-    goToTourStep3();
-}
 
 function startTourStep4() {
     // Find and highlight the Social Media Assets group
@@ -2820,7 +2571,7 @@ function goBackToTourStep2() {
 }
 
 function goBackToTourStep3() {
-    console.log('🐛 DEBUG: goBackToTourStep3 updated function called - Blog Post reset');
+    console.log('🐛 DEBUG: goBackToTourStep3 updated function called - Campaign Brief');
     // Remove current tooltip
     const tooltip = document.querySelector('.tour-tooltip');
     if (tooltip) tooltip.remove();
@@ -2831,17 +2582,16 @@ function goBackToTourStep3() {
         element.classList.remove('tour-highlight');
     });
     
-    // Find and highlight the Blog Post card (reset to beginning)
-    const blogPostCard = document.querySelector('#tour-blog-post-card');
-    if (!blogPostCard) {
-        console.error('Blog post card not found for tour!');
+    // Find the Campaign Brief card (no highlighting)
+    const campaignBriefCard = document.querySelector('.campaign-brief');
+    if (!campaignBriefCard) {
+        console.error('Campaign brief card not found for tour!');
         return;
     }
-    blogPostCard.classList.add('tour-highlight');
     
     // Pan to the element and show step 3 tooltip
-    panToElement(blogPostCard, () => {
-        showBlogPostTooltip(blogPostCard);
+    panToElement(campaignBriefCard, () => {
+        showCampaignBriefTooltip(campaignBriefCard);
     }, true);
 }
 

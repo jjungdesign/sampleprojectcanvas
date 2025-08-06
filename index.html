@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Marketing Campaign - Canvas</title>
+    <title>Sample Project App - Canvas</title>
     <link rel="stylesheet" href="styles.css?v=1734000029">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
@@ -20,7 +20,7 @@
         
         <div class="header-center">
             <button class="header-title-btn" onclick="showProjectSettings()">
-                <span>Summer of Sniffs Campaign</span>
+                <span>Sample Project App</span>
                 <svg viewBox="0 0 14 12" width="16" height="12">
                     <path d="M1 3L9 3M9 3C9 4.10457 9.89543 5 11 5C12.1046 5 13 4.10457 13 3C13 1.89543 12.1046 1 11 1C9.89543 1 9 1.89543 9 3ZM5 8.33333L13 8.33333M5 8.33333C5 9.4379 4.10457 10.3333 3 10.3333C1.89543 10.3333 1 9.4379 1 8.33333C1 7.22876 1.89543 6.33333 3 6.33333C4.10457 6.33333 5 7.22876 5 8.33333Z" stroke="#848291" stroke-width="1.5" stroke-linecap="square" fill="none"/>
                 </svg>
@@ -66,6 +66,34 @@
                         Hi Sarah – Here's a sample project for Marketing Campaigns.
                     </div>
                 </div>
+                
+                <!-- Tour CTA Button -->
+                <div class="tour-cta-container" id="tourCtaContainer">
+                    <button 
+                        class="tour-cta-button" 
+                        id="tourStartButton"
+                        style="
+                            background: #F3F4F6; 
+                            color: #4B5563; 
+                            border: 1px solid #E5E7EB; 
+                            padding: 8px 14px; 
+                            border-radius: 6px; 
+                            cursor: pointer; 
+                            font-weight: 500;
+                            margin-top: 8px;
+                            display: block;
+                            width: 100%;
+                            text-align: center;
+                            transition: background-color 0.2s;
+                            opacity: 0;
+                            transform: translateY(20px);
+                        "
+                        onmouseover="this.style.background='#E5E7EB'"
+                        onmouseout="this.style.background='#F3F4F6'"
+                    >
+                        Start Tour
+                    </button>
+                </div>
             </div>
             
             <div class="chat-input">
@@ -104,16 +132,7 @@
                             <div class="sample-project-tag">
                                 <span>Sample Project</span>
                             </div>
-                            <!-- Tour Start Button -->
-                            <div class="tour-start-button" id="tourStartButton">
-                                <span class="tour-icon" style="background:#222;display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;margin-right:8px;">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
-                                        <circle cx="12" cy="12" r="12" fill="none"/>
-                                        <polygon points="7,5 20,12 7,19" fill="white"/>
-                                    </svg>
-                                </span>
-                                <span style="color:#222;font-size:18px;font-weight:500;">Tour</span>
-                            </div>
+
                         </div>
                         
                         <div class="canvas-content">
@@ -149,11 +168,11 @@
                                             <h3>Campaign Brief</h3>
                                             <div class="content-text">
                                                 <h4>Overview</h4>
-                                                <p>Whisker & Tails, a premium pet food brand dedicated to providing wholesome, all-natural, human-grade ingredients, is launching the "Summer of Sniffs" campaign to celebrate summer with limited-edition seasonal flavors. The campaign will promote "Grilled Salmon Picnic" for cats and "BBQ Chicken Feast" for dogs. With eco-friendly packaging and vet-approved recipes, this initiative aligns with the brand's mission of delivering health-focused, joyful moments for pets and their parents.</p>
-                                                <p>The campaign's core objective is to bring awareness and excitement to the seasonal launch while cultivating deeper engagement with pet owners through memorable summer experiences and user-generated content.</p>
+                                                <p>This is a Sample Project App demonstrating a comprehensive marketing campaign management dashboard. It showcases modern campaign planning, asset organization, content creation workflows, and team collaboration tools in an interactive canvas environment.</p>
+                                                <p>The app demonstrates key features including AI-powered chat assistance, guided tour functionality, project settings management, and responsive design for managing complex marketing campaigns across multiple channels and assets.</p>
                                                 
-                                                <h4>Campaign Concept</h4>
-                                                <p>"Summer of Sniffs" is a lighthearted and cheerful marketing campaign designed to inspire pet owners to treat their furry friends to delicious summer-inspired meals and adventures. The concept ties seasonal nostalgia to Whisker & Tails' limited-edition flavors, driving product trial and fostering shareable moments online. Key visuals and messaging will reflect sunny, playful outdoor activities, tying the joy of summer to a pet's happy and healthy lifestyle—all starting with what's in their bowl.</p>
+                                                <h4>App Features</h4>
+                                                <p>The Sample Project App demonstrates modern marketing campaign management through an intuitive interface design. Features include drag-and-drop canvas navigation, contextual AI assistance, multi-asset organization, and real-time collaboration tools. The interface adapts to different screen sizes and provides smooth animations for enhanced user experience across desktop and mobile devices.</p>
                                                 
                                                 <h4>Goals</h4>
                                                 <ul>

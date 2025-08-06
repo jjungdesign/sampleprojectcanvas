@@ -1195,49 +1195,7 @@ body {
     margin-right: 0;
 }
 
-/* Tour Start Button */
-.tour-start-button {
-    background: #f7f7f7;
-    color: #222;
-    padding: 0 18px 0 8px;
-    border-radius: 999px;
-    display: flex;
-    align-items: center;
-    gap: 0;
-    cursor: pointer;
-    font-size: 18px;
-    font-weight: 500;
-    border: 1px solid #ededed;
-    box-shadow: none;
-    height: 40px;
-    transition: background 0.2s;
-}
 
-.tour-start-button:hover {
-    background: #f0f0f0;
-    color: #222;
-}
-
-.tour-icon {
-    margin-right: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background: #222;
-}
-
-/* Responsive adjustments for tour button */
-@media (max-width: 768px) {
-    .tour-start-button {
-        top: 70px;
-        right: 15px;
-        padding: 6px 12px;
-        font-size: 11px;
-    }
-}
 
 /* Tour Tooltip Styles */
 .tour-tooltip {
@@ -1423,11 +1381,17 @@ body {
 
 /* Tour Highlight Styles */
 .tour-highlight {
-    border: 2px solid #3B82F6 !important;
-    box-shadow: none !important;
     position: relative;
     z-index: 1000;
     transition: all 0.3s ease;
+    box-shadow: 0 0 0 2px #3B82F6 !important;
+}
+
+/* Tour CTA Button Styles */
+.tour-cta-container {
+    margin: 8px 0 16px 0;
+    display: flex;
+    justify-content: center;
 }
 
 .social-media .tour-highlight {
