@@ -1,0 +1,23 @@
+{
+  "name": "summer-of-sniffs-campaign",
+  "version": "1.0.0",
+  "description": "Interactive marketing campaign canvas for Whisker & Tails Summer of Sniffs",
+  "main": "index.html",
+  "scripts": {
+    "start": "serve .",
+    "dev": "serve . -l 3000"
+  },
+  "keywords": [
+    "marketing",
+    "campaign",
+    "canvas",
+    "interactive",
+    "tour"
+  ],
+  "author": "Julie Jung",
+  "license": "MIT",
+  "dependencies": {
+    "serve": "^14.0.0"
+  }
+}
+
